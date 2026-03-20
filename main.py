@@ -9,7 +9,7 @@ from tkinter import ttk
 #      \_/  (____  /__|  |__(____  /___  /____/\___  >
 #                \/              \/    \/          \/
 
-taille_totale = 8
+taille_totale = 6
 couleurs = ["#FF0000", "#001AFF", "#FFAE00", "#11FF00"]
 
 premier_clic = [None]  # Stockera (ligne, colonne) du premier pion choisi

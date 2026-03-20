@@ -133,9 +133,51 @@ def pions_autour(grille: list, res: tuple):
 #     |  |  / __ \\  \___|   Y  \  ___/  /    ^   /
 #     |__| (____  /\___  >___|  /\___  > \____   |
 #               \/     \/     \/     \/       |__|
-
-
 def modifier_grille(grille, coordonnees):
+    if not coordonnees:
+        return
+
+    largeur = len(grille[0])
+    # On utilise un set pour être sûr de ne pas traiter deux fois la même case
+    coords_uniques = set(coordonnees)
+
+    for j in range(largeur):
+        # On extrait les lignes concernées pour la colonne j, du bas vers le haut
+        lignes_a_vide = sorted(
+            [c[0] for c in coords_uniques if c[1] == j], reverse=True
+        )
+
+        for ligne_vide in lignes_a_vide:
+            # On fait descendre tout ce qui est au-dessus
+            for r in range(ligne_vide, 0, -1):
+                grille[r][j] = grille[r - 1][j]
+
+            # Nouveau bonbon en haut
+            grille[0][j] = randint(0, 3)
+
+
+def modifier_grille_a(grille, coordonnees):
+    if not coordonnees:
+        return
+
+    largeur = len(grille[0])
+    hauteur = len(grille)
+
+    # On traite chaque colonne séparément
+    for j in range(largeur):
+        # On récupère les lignes à supprimer pour CETTE colonne
+        lignes_a_suppr = sorted([c[0] for c in coordonnees if c[1] == j], reverse=True)
+
+        for ligne_vide in lignes_a_suppr:
+            # On fait descendre tout ce qui est au-dessus de la case vide
+            for r in range(ligne_vide, 0, -1):
+                grille[r][j] = grille[r - 1][j]
+
+            # On remplit le haut avec un nouveau bonbon
+            grille[0][j] = randint(0, 3)
+
+
+def modifier_grille_v(grille, coordonnees):
     """
     Remplace tous les bonbons présents aux coordonnées entrées par les bonbons présents
     sur les cases juste au dessus. (Tant que la ligne au dessus contient des bonbons,
@@ -315,7 +357,6 @@ def gerer_clic(r, c, labels_grille, premier_clic, taille_totale, couleurs, model
         lon = abs(c1 - c2)
         # si elle sont a proximité (dist =1)
         if (lat + lon) == 1 and coup(modele_raw, r1, c1, r2, c2):
-            modifier_grille(modele_raw, test_alignement(modele_raw))
             print(f"Échange réussi entre [{r1},{c1}] et [{r2},{c2}]")
         else:
             print("Coup invalide ou trop loin")
@@ -323,6 +364,19 @@ def gerer_clic(r, c, labels_grille, premier_clic, taille_totale, couleurs, model
         # on reset a aucun clic, et on rafriachit l'interface pour enlever les bordures
         premier_clic[0] = None
         rafraichir_interface(taille_totale, couleurs, modele_raw, labels_grille)
+        fini = test_alignement(modele_raw)
+        while len(fini) > 0:
+            for r, c in fini:
+                labels_grille[r][c].config(bg="white")
+                labels_grille[0][0].winfo_toplevel().update()
+                labels_grille[0][0].winfo_toplevel().after(360)
+
+                modifier_grille(modele_raw, test_alignement(modele_raw))
+            rafraichir_interface(taille_totale, couleurs, modele_raw, labels_grille)
+            labels_grille[0][
+                0
+            ].winfo_toplevel().update()  # Force l'interface à se mettre à jour immédiatement
+            fini = test_alignement(modele_raw)
 
 
 def start_affichage(taille_totale, couleurs, modele_raw, labels_grille, premier_clic):
