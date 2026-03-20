@@ -1,5 +1,6 @@
 from random import randint
 from tkinter import *
+from tkinter import ttk
 
 
 #      __                .__              ____
@@ -156,7 +157,7 @@ def modifier_grille(grille, coordonnees):
         # On remplace les bonbons de la ligne tout en haut par un bonbon aléatoire.
         # Pour simplifier le code on évite de créer un alignement dans la partie non visible de la grille.
 
-        grille[indice_ligne][indice_colonne] = random.randint(0, 3)
+        grille[indice_ligne][indice_colonne] = randint(0, 3)
         if (
             indice_colonne != 0 and indice_colonne != len(grille[0]) - 1
         ):  # On évite de travailler sur des colonnes inexistantes.
@@ -168,13 +169,13 @@ def modifier_grille(grille, coordonnees):
                 or grille[indice_ligne + 1][indice_colonne]
                 == grille[indice_ligne][indice_colonne]
             ):
-                grille[indice_ligne][indice_colonne] = random.randint(0, 3)
+                grille[indice_ligne][indice_colonne] = randint(0, 3)
         else:
             while (
                 grille[indice_ligne][indice_colonne]
                 == grille[indice_ligne + 1][indice_colonne]
             ):
-                grille[indice_ligne][indice_colonne] = random.randint(0, 3)
+                grille[indice_ligne][indice_colonne] = randint(0, 3)
 
 
 #      __                .__              .________
@@ -265,7 +266,7 @@ def coup(grille: list, r1: int, c1: int, r2: int, c2: int) -> bool:
     alignements = test_alignement(grille)
 
     # si la liste n'est pas vide, c'est que le coup est faisable
-    if alignements != []:
+    if len(alignements) > 0:
         return True
     else:
         # sinon pas de combinaison possible donc on annule le swap
@@ -281,51 +282,50 @@ def coup(grille: list, r1: int, c1: int, r2: int, c2: int) -> bool:
 #               \/     \/     \/     \/          \/
 
 
-def rafraichir_interface():
+def rafraichir_interface(taille_totale, couleurs, modele_raw, labels_grille):
     """Met à jour les couleurs des bonbons sur la grille (swap)"""
     for i in range(taille_totale):
         for j in range(taille_totale):
             labels_grille[i][j].config(
-                bg=couleurs[modele_raw[i][j]], relief="ridge", borderwidth=2
+                bg=couleurs[modele_raw[i][j]], highlightbackground="#F0F0F0"
             )
 
 
-def gerer_clic(r, c):
-    global premier_clic
+def gerer_clic(r, c, labels_grille, premier_clic, taille_totale, couleurs, modele_raw):
 
     # 1. Premier clic : On sélectionne la case
-    if premier_clic is None:
-        premier_clic = (r, c)
+    if premier_clic[0] is None:
+        premier_clic[0] = (r, c)
         labels_grille[r][c].config(
             highlightbackground="black"
         )  # selectionne la case en noir
 
     else:
-        r1, c1 = premier_clic
+        r1, c1 = premier_clic[0]
         r2, c2 = r, c
 
         # On vérifie si c'est la MÊME case (pour désélectionner)
         if (r1, c1) == (r2, c2):
-            premier_clic = None
-            rafraichir_interface()
+            premier_clic[0] = None
+            rafraichir_interface(taille_totale, couleurs, modele_raw, labels_grille)
             return
 
         # on calcule une distance algebrique entre deux cases
-        dist = abs(r1 - r2) + abs(c1 - c2)
-
+        lat = abs(r1 - r2)
+        lon = abs(c1 - c2)
         # si elle sont a proximité (dist =1)
-        if dist == 1:
-
+        if (lat + lon) == 1 and coup(modele_raw, r1, c1, r2, c2):
+            modifier_grille(modele_raw, test_alignement(modele_raw))
             print(f"Échange réussi entre [{r1},{c1}] et [{r2},{c2}]")
         else:
             print("Coup invalide ou trop loin")
 
         # on reset a aucun clic, et on rafriachit l'interface pour enlever les bordures
-        premier_clic = None
-        rafraichir_interface()
+        premier_clic[0] = None
+        rafraichir_interface(taille_totale, couleurs, modele_raw, labels_grille)
 
 
-def start_affichage(taille_totale, couleurs, modele_raw, labels_grille):
+def start_affichage(taille_totale, couleurs, modele_raw, labels_grille, premier_clic):
     """lance l'affichage de la fenetre tk"""
     root = Tk()
     root.title("Candy Crush • ISN")
@@ -356,12 +356,23 @@ def start_affichage(taille_totale, couleurs, modele_raw, labels_grille):
                 highlightbackground="#F0F0F0",
             )
             # On lie l'événement clic (lambda est nécessaire pour passer les coordonnées)
-            lbl.bind("<Button-1>", lambda event, r=i, c=j: gerer_clic(r, c))
+            lbl.bind(
+                "<Button-1>",
+                lambda event, r=i, c=j: gerer_clic(
+                    r,
+                    c,
+                    labels_grille,
+                    premier_clic,
+                    taille_totale,
+                    couleurs,
+                    modele_raw,
+                ),
+            )
 
             # On stocke le widget pour pouvoir le modifier plus tard
             labels_grille[i][j] = lbl
 
             lbl.grid(column=j, row=i, sticky="nsew", padx=3, pady=3)
-    rafraichir_interface()
+    rafraichir_interface(taille_totale, couleurs, modele_raw, labels_grille)
 
     root.mainloop()
