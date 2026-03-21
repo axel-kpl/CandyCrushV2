@@ -369,7 +369,7 @@ def gerer_clic(r, c, labels_grille, premier_clic, taille_totale, couleurs, model
             for r, c in fini:
                 labels_grille[r][c].config(bg="white")
                 labels_grille[0][0].winfo_toplevel().update()
-                labels_grille[0][0].winfo_toplevel().after(360)
+                labels_grille[0][0].winfo_toplevel().after(10)
 
                 modifier_grille(modele_raw, test_alignement(modele_raw))
             rafraichir_interface(taille_totale, couleurs, modele_raw, labels_grille)
