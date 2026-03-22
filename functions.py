@@ -333,7 +333,9 @@ def rafraichir_interface(taille_totale, couleurs, modele_raw, labels_grille):
             )
 
 
-def gerer_clic(r, c, labels_grille, premier_clic, taille_totale, couleurs, modele_raw):
+def gerer_clic(
+    r, c, labels_grille, premier_clic, taille_totale, couleurs, modele_raw, delay
+):
 
     # 1. Premier clic : On sélectionne la case
     if premier_clic[0] is None:
@@ -369,7 +371,7 @@ def gerer_clic(r, c, labels_grille, premier_clic, taille_totale, couleurs, model
             for r, c in fini:
                 labels_grille[r][c].config(bg="white")
                 labels_grille[0][0].winfo_toplevel().update()
-                labels_grille[0][0].winfo_toplevel().after(10)
+                labels_grille[0][0].winfo_toplevel().after(delay)
 
                 modifier_grille(modele_raw, test_alignement(modele_raw))
             rafraichir_interface(taille_totale, couleurs, modele_raw, labels_grille)
@@ -379,7 +381,9 @@ def gerer_clic(r, c, labels_grille, premier_clic, taille_totale, couleurs, model
             fini = test_alignement(modele_raw)
 
 
-def start_affichage(taille_totale, couleurs, modele_raw, labels_grille, premier_clic):
+def start_affichage(
+    taille_totale, couleurs, modele_raw, labels_grille, premier_clic, delay
+):
     """lance l'affichage de la fenetre tk"""
     root = Tk()
     root.title("Candy Crush • ISN")
@@ -420,6 +424,7 @@ def start_affichage(taille_totale, couleurs, modele_raw, labels_grille, premier_
                     taille_totale,
                     couleurs,
                     modele_raw,
+                    delay,
                 ),
             )
 
