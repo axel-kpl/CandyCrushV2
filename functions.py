@@ -11,31 +11,6 @@ from tkinter import ttk
 #               \/     \/     \/     \/
 
 
-def extraire_csv(nom_fichier: str, nbr_chiffre: int, type_int=True) -> list:
-    """Extrait un fichier csv d'une partie de CandyCrush et renvoie une liste 2D
-    de chiffre de type int !!"""
-    grille = []
-    with open(nom_fichier, "r", encoding="utf-8") as fichier:
-        for ligne in fichier:
-            current = []
-            for element in ligne:
-                if (
-                    element != " " and element != "\n"
-                ):  # on ignore les espaces et les retours à la ligne
-                    if type_int:
-                        current.append(int(element))
-                    else:
-                        current.append(element)
-            grille.append(current)
-    if (test_alignement(grille) != []) or (not prevision(grille)):
-        return grille
-    raise (
-        ValueError(
-            "La grille ne possède pas de coup jouable au prochain tour / admet deja des coups"
-        )
-    )
-
-
 liste = extraire_csv("exemple_grille.csv")
 print(liste)
 
@@ -441,3 +416,36 @@ def start_affichage(
     rafraichir_interface(taille_totale, couleurs, modele_raw, labels_grille)
 
     root.mainloop()
+
+
+#
+#      ____   _________  __
+#    _/ ___\ /  ___/\  \/ /
+#    \  \___ \___ \  \   /
+#     \___  >____  >  \_/
+#         \/     \/
+
+
+def extraire_csv(nom_fichier: str, type_int=True) -> list:
+    """Extrait un fichier csv d'une partie de CandyCrush et renvoie une liste 2D
+    de chiffre de type int !!"""
+    grille = []
+    with open(nom_fichier, "r", encoding="utf-8") as fichier:
+        for ligne in fichier:
+            current = []
+            for element in ligne:
+                if (
+                    element != " " and element != "\n"
+                ):  # on ignore les espaces et les retours à la ligne
+                    if type_int:
+                        current.append(int(element))
+                    else:
+                        current.append(element)
+            grille.append(current)
+    if (test_alignement(grille) != []) or (not prevision(grille)):
+        return grille
+    raise (
+        ValueError(
+            "La grille ne possède pas de coup jouable au prochain tour / admet deja des coups"
+        )
+    )
