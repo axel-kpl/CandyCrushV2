@@ -11,7 +11,7 @@ from tkinter import ttk
 #               \/     \/     \/     \/
 
 
-def extraire_csv(nom_fichier: str, type_int=True) -> list:
+def extraire_csv(nom_fichier: str, nbr_chiffre: int, type_int=True) -> list:
     """Extrait un fichier csv d'une partie de CandyCrush et renvoie une liste 2D
     de chiffre de type int !!"""
     grille = []
@@ -27,7 +27,13 @@ def extraire_csv(nom_fichier: str, type_int=True) -> list:
                     else:
                         current.append(element)
             grille.append(current)
-    return grille
+    if (test_alignement(grille) != []) or (not prevision(grille)):
+        return grille
+    raise (
+        ValueError(
+            "La grille ne possède pas de coup jouable au prochain tour / admet deja des coups"
+        )
+    )
 
 
 liste = extraire_csv("exemple_grille.csv")
