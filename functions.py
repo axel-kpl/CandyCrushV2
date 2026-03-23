@@ -11,10 +11,6 @@ from tkinter import ttk
 #               \/     \/     \/     \/
 
 
-liste = extraire_csv("exemple_grille.csv")
-print(liste)
-
-
 def creer_monde_random(nbr_type_bonbons: int, taille_liste: int) -> list:
     """Crée une liste 2D composée de valeurs aléatoires allant de 0 à nbr_max-1
     correspondant aux couleurs des bonbons"""
@@ -442,7 +438,7 @@ def extraire_csv(nom_fichier: str, type_int=True) -> list:
                     else:
                         current.append(element)
             grille.append(current)
-    if (test_alignement(grille) != []) or (not prevision(grille)):
+    if not (test_alignement(grille) != []) or (not prevision(grille)):
         return grille
     raise (
         ValueError(
