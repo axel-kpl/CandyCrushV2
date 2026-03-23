@@ -11,8 +11,7 @@ import matplotlib.pyplot as plt
 
 taille_totale = 8
 couleurs = ["#FF0000", "#55FF00", "#FFFB00", "#0400FF", "#000000"]
-delay = 600
-selection_rect = [None]
+delay = 0.1  # delai en seconde !!
 labels_grille = [
     [None for _ in range(taille_totale)] for _ in range(taille_totale)
 ]  # Stocke les widgets
@@ -37,4 +36,4 @@ else:
         modele_raw = creer_monde_random(4, taille_totale)
 
 
-start_affichage(taille_totale, couleurs, modele_raw, delay, selection_rect)
+start_affichage(taille_totale, couleurs, modele_raw, delay)

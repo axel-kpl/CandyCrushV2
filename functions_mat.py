@@ -315,19 +315,29 @@ def gerer_clic(
 
     # 1. Premier clic : On sélectionne la case
     if premier_clic[0] == None:
+        if event.xdata is None or event.ydata is None:
+            return  # gestion clic dehors grille
+        c = int(round(event.xdata))
+        r = int(round(event.ydata))
         premier_clic[0] = (r, c)
         rect = patches.Rectangle(
-            (c - 0.5, r - 0.5), 1, 1, linewidth=3, edgecolor="black", fill=False
+            (c - 0.5, r - 0.5), 1, 1, linewidth=3, edgecolor="#96FFB5", fill=False
         )
         ax.add_patch(rect)
         fig.canvas.draw_idle()
     else:
+        if event.xdata is None or event.ydata is None:
+            return  # gestion clic dehors grille
+        c = int(round(event.xdata))
+        r = int(round(event.ydata))
         r1, c1 = premier_clic[0]
         r2, c2 = r, c
 
         # On vérifie si c'est la MÊME case (pour désélectionner)
         if (r1, c1) == (r2, c2):
             premier_clic[0] = None
+            for patch in ax.patches[::-1]:
+                patch.remove()
             rafraichir_interface(modele_raw, img, fig)
             return
 
@@ -354,7 +364,7 @@ def gerer_clic(
             fini = test_alignement(modele_raw)
 
 
-def start_affichage(taille_totale, couleurs, modele_raw, delay, selection_rect):
+def start_affichage(taille_totale, couleurs, modele_raw, delay):
     """lance l'affichage de la fenetre matplotlib"""
     fig, ax = plt.subplots()
 
@@ -365,7 +375,7 @@ def start_affichage(taille_totale, couleurs, modele_raw, delay, selection_rect):
         cmap=cmap_custom,
         extent=[-0.5, taille_totale - 0.5, taille_totale - 0.5, -0.5],
     )
-    selection_rect = None
+    selection_rect = [None]
     cid = fig.canvas.mpl_connect(
         "button_press_event",
         lambda event: gerer_clic(
