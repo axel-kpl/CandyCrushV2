@@ -260,8 +260,10 @@ def prevision(grille):
                 grille_bis[i][j],
                 grille_bis[i][j + 1],
             )
-        i += 1
-        j += 1
+        i = i + 1
+        if i == len(grille):
+            i = 0
+            j = j + 1
     return test
 
 
