@@ -1,5 +1,6 @@
 from functions import *
 from tkinter import ttk
+import os
 
 
 #                        .__      ___.   .__
@@ -29,8 +30,10 @@ if user_choice == 1:
     fichier_nom = input("Quel est le nom de votre fichier a importer ? : ")
     if ".csv" not in fichier_nom:
         fichier_nom += ".csv"
-    modele_raw = extraire_csv(fichier_nom, True)
-    taille_totale = 7  # ne pas modifier ici, gestion de l'import csv
+        dossier_actuel = os.path.dirname(os.path.abspath(__file__))
+        chemin_complet = os.path.join(dossier_actuel, fichier_nom)
+        taille_totale = 7  # ne pas modifier ici, gestion de l'import csv
+        modele_raw = extraire_csv(chemin_complet, True)
 else:
     modele_raw = creer_monde_random(4, taille_totale)
     while (test_alignement(modele_raw) != []) or (not prevision(modele_raw)):

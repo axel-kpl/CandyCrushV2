@@ -1,5 +1,6 @@
 from functions_mat import *
 import matplotlib.pyplot as plt
+import os
 
 
 #                        .__      ___.   .__
@@ -9,16 +10,17 @@ import matplotlib.pyplot as plt
 #      \_/  (____  /__|  |__(____  /___  /____/\___  >
 #                \/              \/    \/          \/
 
-taille_totale = 8
+taille_totale = 7
 couleurs = [
     "#FF9100",
     "#FF0000",
     "#498100",
     "#1700B0",
+    "#AE00B0",
     "#FFFFFF",
-]  # ne pas rajouter de couleurs !!! Les 4 premieres
+]  # ne pas rajouter de couleurs !!! Les premieres
 # sont les couleurs des bonbons, la dernière est la couleur de disparition des bonbons
-delay = 0.2  # delai en seconde !!
+delay = 0.3  # delai en seconde !!
 labels_grille = [
     [None for _ in range(taille_totale)] for _ in range(taille_totale)
 ]  # Stocke les widgets
@@ -35,12 +37,16 @@ if user_choice == 1:
     fichier_nom = input("Quel est le nom de votre fichier a importer ? : ")
     if ".csv" not in fichier_nom:
         fichier_nom += ".csv"
-    modele_raw = extraire_csv(fichier_nom, True)
-    taille_totale = 7  # ne pas modifier ici, gestion de l'import csv
+        dossier_actuel = os.path.dirname(os.path.abspath(__file__))
+        chemin_complet = os.path.join(dossier_actuel, fichier_nom)
+        # ne pas modifier ici, gestion de l'import csv
+        modele_raw = extraire_csv(chemin_complet, True)
+        taille_totale = len(modele_raw)
+
 else:
-    modele_raw = creer_monde_random(4, taille_totale)
+    modele_raw = creer_monde_random(5, taille_totale)
     while (test_alignement(modele_raw) != []) or (not prevision(modele_raw)):
-        modele_raw = creer_monde_random(4, taille_totale)
+        modele_raw = creer_monde_random(5, taille_totale)
 
 
 start_affichage(taille_totale, couleurs, modele_raw, delay)

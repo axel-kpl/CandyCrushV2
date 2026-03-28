@@ -39,7 +39,7 @@ def test_alignement(grille: list):
     for i in range(hauteur):
         for j in range(largeur):
             couleur_actuelle = grille[i][j]
-            if couleur_actuelle == -1 or couleur_actuelle == 4:
+            if couleur_actuelle == 5:
                 continue  # gestion de cases vides
 
             # --- Vérification Horizontale (3 à la suite) ---
@@ -110,7 +110,7 @@ def pions_autour(grille: list, res: tuple):
 #     |  |  / __ \\  \___|   Y  \  ___/  /    ^   /
 #     |__| (____  /\___  >___|  /\___  > \____   |
 #               \/     \/     \/     \/       |__|
-def modifier_grille(grille, coordonnees):
+def modifier_grille(grille, coordonnees, nbr_pions=5):
     if not coordonnees:
         return
 
@@ -128,7 +128,7 @@ def modifier_grille(grille, coordonnees):
 
         nb_nouveaux = hauteur - len(colonne_restante)
 
-        nouveaux_bonbons = [randint(0, 3) for _ in range(nb_nouveaux)]
+        nouveaux_bonbons = [randint(0, nbr_pions - 1) for _ in range(nb_nouveaux)]
 
         nouvelle_colonne = nouveaux_bonbons + colonne_restante
 
@@ -294,7 +294,7 @@ def gerer_clic(
             fini = test_alignement(modele_raw)
             while len(fini) > 0:
                 for r, c in fini:
-                    modele_raw[r][c] = 4
+                    modele_raw[r][c] = len(couleurs) - 1
                 rafraichir_interface(modele_raw, img, fig)
                 plt.pause(delay)
 
@@ -310,6 +310,10 @@ def gerer_clic(
 
 def start_affichage(taille_totale, couleurs, modele_raw, delay):
     """lance l'affichage de la fenetre matplotlib"""
+
+    hauteur = len(modele_raw)
+    largeur = len(modele_raw[0])
+
     fig, ax = plt.subplots()
 
     cmap_custom = ListedColormap(couleurs)
@@ -318,19 +322,16 @@ def start_affichage(taille_totale, couleurs, modele_raw, delay):
         modele_raw,
         cmap=cmap_custom,
         vmin=0,
-        vmax=5,
-        extent=[-0.5, taille_totale - 0.5, taille_totale - 0.5, -0.5],
+        vmax=len(couleurs) - 1,
+        extent=[-0.5, largeur - 0.5, hauteur - 0.5, -0.5],
     )
     # ajout des grilles noires pour plus de visibilité
 
-    limites_grille = [x + 0.5 for x in range(taille_totale - 1)]
-
-    ax.set_xticks(limites_grille)
-    ax.set_yticks(limites_grille)
-    ax.grid(color="#000000", linestyle="-", linewidth=1)
-    ax.tick_params(
-        which="both", bottom=False, left=False, labelbottom=False, labelleft=False
-    )
+    ax.set_xticks([x + 0.5 for x in range(largeur - 1)])
+    ax.set_yticks([x + 0.5 for x in range(hauteur - 1)])
+    ax.grid(True, color="#000000", linestyle="-", linewidth=1)
+    ax.set_axisbelow(False)
+    ax.tick_params(bottom=False, left=False, labelbottom=False, labelleft=False)
 
     selection_rect = [None]
 
@@ -362,7 +363,7 @@ def start_affichage(taille_totale, couleurs, modele_raw, delay):
 
 def extraire_csv(nom_fichier: str, type_int=True) -> list:
     """Extrait un fichier csv d'une partie de CandyCrush et renvoie une liste 2D
-    de chiffre de type int !!"""
+    de chiffre de type int !! si type_int est set a True"""
     grille = []
     with open(nom_fichier, "r", encoding="utf-8") as fichier:
         for ligne in fichier:
