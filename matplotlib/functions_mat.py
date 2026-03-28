@@ -39,7 +39,7 @@ def test_alignement(grille: list):
     for i in range(hauteur):
         for j in range(largeur):
             couleur_actuelle = grille[i][j]
-            if couleur_actuelle == -1:
+            if couleur_actuelle == -1 or couleur_actuelle == 4:
                 continue  # gestion de cases vides
 
             # --- Vérification Horizontale (3 à la suite) ---
@@ -115,86 +115,25 @@ def modifier_grille(grille, coordonnees):
         return
 
     largeur = len(grille[0])
+    hauteur = len(grille)
     # On utilise un set pour être sûr de ne pas traiter deux fois la même case
     coords_uniques = set(coordonnees)
 
     for j in range(largeur):
         # On extrait les lignes concernées pour la colonne j, du bas vers le haut
-        lignes_a_vide = sorted(
-            [c[0] for c in coords_uniques if c[1] == j], reverse=True
-        )
+        colonne_restante = []
+        for i in range(hauteur):
+            if (i, j) not in coords_uniques:
+                colonne_restante.append(grille[i][j])
 
-        for ligne_vide in lignes_a_vide:
-            # On fait descendre tout ce qui est au-dessus
-            for r in range(ligne_vide, 0, -1):
-                grille[r][j] = grille[r - 1][j]
+        nb_nouveaux = hauteur - len(colonne_restante)
 
-            # Nouveau bonbon en haut
-            grille[0][j] = randint(0, 3)
+        nouveaux_bonbons = [randint(0, 3) for _ in range(nb_nouveaux)]
 
+        nouvelle_colonne = nouveaux_bonbons + colonne_restante
 
-def modifier_grille_a(grille, coordonnees):
-    if not coordonnees:
-        return
-
-    largeur = len(grille[0])
-    hauteur = len(grille)
-
-    # On traite chaque colonne séparément
-    for j in range(largeur):
-        # On récupère les lignes à supprimer pour CETTE colonne
-        lignes_a_suppr = sorted([c[0] for c in coordonnees if c[1] == j], reverse=True)
-
-        for ligne_vide in lignes_a_suppr:
-            # On fait descendre tout ce qui est au-dessus de la case vide
-            for r in range(ligne_vide, 0, -1):
-                grille[r][j] = grille[r - 1][j]
-
-            # On remplit le haut avec un nouveau bonbon
-            grille[0][j] = randint(0, 3)
-
-
-def modifier_grille_v(grille, coordonnees):
-    """
-    Remplace tous les bonbons présents aux coordonnées entrées par les bonbons présents
-    sur les cases juste au dessus. (Tant que la ligne au dessus contient des bonbons,
-    remplacer les bonbons par ceux de la ligne juste au dessus, et si la ligne au dessus ne
-    contient pas de bonbons c’est que on est en haut de la grille et il faut remplacer les cases
-    vides par des bonbons aléatoires), fait tomber les bonbons sur les cases vides
-    verticalement et complète les cases du haut par des bonbons aléatoires.
-    """
-    for i in range(len(coordonnees)):
-        indice_ligne = coordonnees[i][0]
-        indice_colonne = coordonnees[i][1]
-        while (
-            indice_ligne != 0
-        ):  # On évite de faire appel à une ligne au dessus de la ligne la plus haute de la grille.
-            grille[indice_ligne][indice_colonne] = grille[indice_ligne - 1][
-                indice_colonne
-            ]
-            indice_ligne = indice_ligne - 1
-        # On remplace les bonbons de la ligne tout en haut par un bonbon aléatoire.
-        # Pour simplifier le code on évite de créer un alignement dans la partie non visible de la grille.
-
-        grille[indice_ligne][indice_colonne] = randint(0, 3)
-        if (
-            indice_colonne != 0 and indice_colonne != len(grille[0]) - 1
-        ):  # On évite de travailler sur des colonnes inexistantes.
-            while (
-                grille[indice_ligne][indice_colonne]
-                == grille[indice_ligne][indice_colonne - 1]
-                or grille[indice_ligne][indice_colonne]
-                == grille[indice_ligne][indice_colonne + 1]
-                or grille[indice_ligne + 1][indice_colonne]
-                == grille[indice_ligne][indice_colonne]
-            ):
-                grille[indice_ligne][indice_colonne] = randint(0, 3)
-        else:
-            while (
-                grille[indice_ligne][indice_colonne]
-                == grille[indice_ligne + 1][indice_colonne]
-            ):
-                grille[indice_ligne][indice_colonne] = randint(0, 3)
+        for i in range(hauteur):
+            grille[i][j] = nouvelle_colonne[i]
 
 
 #      __                .__              .________
@@ -313,8 +252,8 @@ def gerer_clic(
     taille_totale, event, img, ax, fig, premier_clic, modele_raw, couleurs, delay
 ):
 
-    # 1. Premier clic : On sélectionne la case
-    if premier_clic[0] == None:
+    # 1er clic
+    if premier_clic[0] is None:
         if event.xdata is None or event.ydata is None:
             return  # gestion clic dehors grille
         c = int(round(event.xdata))
@@ -325,6 +264,7 @@ def gerer_clic(
         )
         ax.add_patch(rect)
         fig.canvas.draw_idle()
+    # sinon c'est le deuxieme clic
     else:
         if event.xdata is None or event.ydata is None:
             return  # gestion clic dehors grille
@@ -333,11 +273,13 @@ def gerer_clic(
         r1, c1 = premier_clic[0]
         r2, c2 = r, c
 
+        # on enleve le carree de surbrillance
+        for patch in ax.patches[::-1]:
+            patch.remove()
+        premier_clic[0] = None
+
         # On vérifie si c'est la MÊME case (pour désélectionner)
         if (r1, c1) == (r2, c2):
-            premier_clic[0] = None
-            for patch in ax.patches[::-1]:
-                patch.remove()
             rafraichir_interface(modele_raw, img, fig)
             return
 
@@ -347,21 +289,23 @@ def gerer_clic(
         # si elle sont a proximité (dist =1)
         if (lat + lon) == 1 and coup(modele_raw, r1, c1, r2, c2):
             print(f"Échange réussi entre [{r1},{c1}] et [{r2},{c2}]")
+            rafraichir_interface(modele_raw, img, fig)
+            plt.pause(delay)
+            fini = test_alignement(modele_raw)
+            while len(fini) > 0:
+                for r, c in fini:
+                    modele_raw[r][c] = 4
+                rafraichir_interface(modele_raw, img, fig)
+                plt.pause(delay)
+
+                modifier_grille(modele_raw, fini)
+                rafraichir_interface(modele_raw, img, fig)
+                plt.pause(delay)
+                fini = test_alignement(modele_raw)
         else:
             print("Coup invalide ou trop loin")
 
-        # on reset a aucun clic, et on rafriachit l'interface pour enlever les bordures
-        premier_clic[0] = None
         rafraichir_interface(modele_raw, img, fig)
-        fini = test_alignement(modele_raw)
-        while len(fini) > 0:
-            for r, c in fini:
-                modele_raw[r][c] = -1
-            rafraichir_interface(modele_raw, img, fig)
-            plt.pause(delay)
-            modifier_grille(modele_raw, fini)
-            rafraichir_interface(modele_raw, img, fig)
-            fini = test_alignement(modele_raw)
 
 
 def start_affichage(taille_totale, couleurs, modele_raw, delay):
@@ -373,9 +317,23 @@ def start_affichage(taille_totale, couleurs, modele_raw, delay):
     img = ax.imshow(
         modele_raw,
         cmap=cmap_custom,
+        vmin=0,
+        vmax=5,
         extent=[-0.5, taille_totale - 0.5, taille_totale - 0.5, -0.5],
     )
+    # ajout des grilles noires pour plus de visibilité
+
+    limites_grille = [x + 0.5 for x in range(taille_totale - 1)]
+
+    ax.set_xticks(limites_grille)
+    ax.set_yticks(limites_grille)
+    ax.grid(color="#000000", linestyle="-", linewidth=1)
+    ax.tick_params(
+        which="both", bottom=False, left=False, labelbottom=False, labelleft=False
+    )
+
     selection_rect = [None]
+
     cid = fig.canvas.mpl_connect(
         "button_press_event",
         lambda event: gerer_clic(

@@ -10,8 +10,15 @@ import matplotlib.pyplot as plt
 #                \/              \/    \/          \/
 
 taille_totale = 8
-couleurs = ["#FF0000", "#55FF00", "#FFFB00", "#0400FF", "#000000"]
-delay = 0.1  # delai en seconde !!
+couleurs = [
+    "#FF9100",
+    "#FF0000",
+    "#498100",
+    "#1700B0",
+    "#FFFFFF",
+]  # ne pas rajouter de couleurs !!! Les 4 premieres
+# sont les couleurs des bonbons, la dernière est la couleur de disparition des bonbons
+delay = 0.2  # delai en seconde !!
 labels_grille = [
     [None for _ in range(taille_totale)] for _ in range(taille_totale)
 ]  # Stocke les widgets
