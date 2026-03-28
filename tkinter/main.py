@@ -11,8 +11,8 @@ import os
 #                \/              \/    \/          \/
 
 taille_totale = 8
-couleurs = ["#FF0000", "#55FF00", "#FFFB00", "#0400FF", "#000000"]
-delay = 600
+couleurs = ["#FF0000", "#55FF00", "#FFFB00", "#0400FF", "#B011C8"]
+delay = 50
 premier_clic = [None]  # Stockera (ligne, colonne) du premier pion choisi
 labels_grille = [
     [None for _ in range(taille_totale)] for _ in range(taille_totale)
