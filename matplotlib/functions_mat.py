@@ -31,39 +31,51 @@ def creer_monde_random(nbr_type_bonbons: int, taille_liste: int) -> list:
 #               \/     \/     \/     \/         \/
 
 
-def test_alignement(grille: list):
-    res = set()  # On utilise un set pour éviter les doublons
-    hauteur = len(grille)
-    largeur = len(grille[0])
-
-    for i in range(hauteur):
-        for j in range(largeur):
-            couleur_actuelle = grille[i][j]
-            if couleur_actuelle == 5:
-                continue  # gestion de cases vides
-
-            # --- Vérification Horizontale (3 à la suite) ---
-            if j < largeur - 2:  # On s'arrête à 2 cases du bord droit
-                if (
-                    grille[i][j + 1] == couleur_actuelle
-                    and grille[i][j + 2] == couleur_actuelle
-                ):
-                    res.add((i, j))
-                    res.add((i, j + 1))
-                    res.add((i, j + 2))
-
-            # --- Vérification Verticale (3 à la suite) ---
-            if i < hauteur - 2:  # On s'arrête à 2 cases du bas
-                if (
-                    grille[i + 1][j] == couleur_actuelle
-                    and grille[i + 2][j] == couleur_actuelle
-                ):
-                    res.add((i, j))
-                    res.add((i + 1, j))
-                    res.add((i + 2, j))
-
-    #  on converti l'ensemble en liste pour renvoyer
-    return list(res)
+def test_alignement(grille, niveau2=False):
+    """
+    renvoie les coordonnées (liste de tuples (x, y)) des groupe de pions dont au moins trois sont alignés et de même couleur
+    complexité : O(n²)
+    """
+    res = []
+    # on teste teste l'alignement dans les deux directions pour chaque pions
+    # puis on les ajoute à res (liste des coordonnées à supprimer)
+    # (en excluant les combinaisons qui sortent de la grille)
+    for i in range(len(grille)):
+        for j in range(len(grille[0])):
+            nb = grille[i][j]
+            if (
+                not (i <= 0 or i >= len(grille) - 1)
+                and grille[i - 1][j] == nb
+                and grille[i + 1][j] == nb
+            ):
+                if not (i - 1, j) in res:
+                    res.append((i - 1, j))
+                if not (i, j) in res:
+                    res.append((i, j))
+                if not (i + 1, j) in res:
+                    res.append((i + 1, j))
+            if (
+                not (j <= 0 or j >= len(grille[0]) - 1)
+                and grille[i][j - 1] == nb
+                and grille[i][j + 1] == nb
+            ):
+                if not (i, j - 1) in res:
+                    res.append((i, j - 1))
+                if not (i, j) in res:
+                    res.append((i, j))
+                if not (i, j + 1) in res:
+                    res.append((i, j + 1))
+    # si on est en niveau 2, on étend la sélection aux pions de mêmes couleur adjacents grâce à la fonction pions autour
+    # on boucle  jusqu'à ce que l'"extension" de la sélection soit vide
+    if niveau2:
+        new = pions_autour(grille, res)
+        while new != []:
+            for x, y in new:
+                res.append((x, y))
+                new = pions_autour(grille, res)
+        return res
+    else:
+        return res
 
 
 def pions_autour(grille: list, res: tuple):
@@ -71,6 +83,7 @@ def pions_autour(grille: list, res: tuple):
     renvoie tout les pions adjacent et de la même couleur que les pions du groupe res
     """
     new = []
+    # pour chaque pion de la sélection, on regarde les pions adjacents et on les ajoute à la sélection s'ils sont de la bonne couleur
     for i, j in res:
         nb = grille[i][j]
         if (
@@ -144,7 +157,7 @@ def modifier_grille(grille, coordonnees, nbr_pions=5):
 #               \/     \/     \/     \/         \/
 
 
-def prevision(grille):
+def prevision(grille, niveau2):
     """
     Renvoie True si un coup est possible sur cette grille, False sinon
     """
@@ -160,7 +173,7 @@ def prevision(grille):
                 grille_bis[i][j],
                 grille_bis[i - 1][j],
             )
-            if test_alignement(grille_bis) != []:
+            if test_alignement(grille_bis, niveau2) != []:
                 test = True
             grille_bis[i - 1][j], grille_bis[i][j] = (
                 grille_bis[i][j],
@@ -171,7 +184,7 @@ def prevision(grille):
                 grille_bis[i][j],
                 grille_bis[i][j - 1],
             )
-            if test_alignement(grille_bis) != []:
+            if test_alignement(grille_bis, niveau2) != []:
                 test = True
             grille_bis[i][j - 1], grille_bis[i][j] = (
                 grille_bis[i][j],
@@ -182,7 +195,7 @@ def prevision(grille):
                 grille_bis[i][j],
                 grille_bis[i + 1][j],
             )
-            if test_alignement(grille_bis) != []:
+            if test_alignement(grille_bis, niveau2) != []:
                 test = True
             grille_bis[i + 1][j], grille_bis[i][j] = (
                 grille_bis[i][j],
@@ -193,7 +206,7 @@ def prevision(grille):
                 grille_bis[i][j],
                 grille_bis[i][j + 1],
             )
-            if test_alignement(grille_bis) != []:
+            if test_alignement(grille_bis, niveau2) != []:
                 test = True
             grille_bis[i][j + 1], grille_bis[i][j] = (
                 grille_bis[i][j],
@@ -214,7 +227,7 @@ def prevision(grille):
 #               \/     \/     \/     \/         \/
 
 
-def coup(grille: list, r1: int, c1: int, r2: int, c2: int) -> bool:
+def coup(grille: list, r1: int, c1: int, r2: int, c2: int, niveau2) -> bool:
     """
     Echange deux bonbons. Si un alignement est créé, l'échange reste et la fonction renvoie True.
     Sinon, on annule et renvoie False.
@@ -223,7 +236,7 @@ def coup(grille: list, r1: int, c1: int, r2: int, c2: int) -> bool:
     grille[r1][c1], grille[r2][c2] = grille[r2][c2], grille[r1][c1]
 
     # on récupère la liste des alignements (tous les alignements de la grille)
-    alignements = test_alignement(grille)
+    alignements = test_alignement(grille, niveau2)
 
     # si la liste n'est pas vide, c'est que le coup est faisable
     if len(alignements) > 0:
@@ -249,7 +262,16 @@ def rafraichir_interface(modele_raw, image_objet, fig):
 
 
 def gerer_clic(
-    taille_totale, event, img, ax, fig, premier_clic, modele_raw, couleurs, delay
+    taille_totale,
+    event,
+    img,
+    ax,
+    fig,
+    premier_clic,
+    modele_raw,
+    couleurs,
+    delay,
+    niveau2,
 ):
 
     # 1er clic
@@ -287,11 +309,11 @@ def gerer_clic(
         lat = abs(r1 - r2)
         lon = abs(c1 - c2)
         # si elle sont a proximité (dist =1)
-        if (lat + lon) == 1 and coup(modele_raw, r1, c1, r2, c2):
+        if (lat + lon) == 1 and coup(modele_raw, r1, c1, r2, c2, niveau2):
             print(f"Échange réussi entre [{r1},{c1}] et [{r2},{c2}]")
             rafraichir_interface(modele_raw, img, fig)
             plt.pause(delay)
-            fini = test_alignement(modele_raw)
+            fini = test_alignement(modele_raw, niveau2)
             while len(fini) > 0:
                 for r, c in fini:
                     modele_raw[r][c] = len(couleurs) - 1
@@ -301,14 +323,14 @@ def gerer_clic(
                 modifier_grille(modele_raw, fini)
                 rafraichir_interface(modele_raw, img, fig)
                 plt.pause(delay)
-                fini = test_alignement(modele_raw)
+                fini = test_alignement(modele_raw, niveau2)
         else:
             print("Coup invalide ou trop loin")
 
         rafraichir_interface(modele_raw, img, fig)
 
 
-def start_affichage(taille_totale, couleurs, modele_raw, delay):
+def start_affichage(taille_totale, couleurs, modele_raw, delay, niveau2):
     """lance l'affichage de la fenetre matplotlib"""
 
     hauteur = len(modele_raw)
@@ -347,6 +369,7 @@ def start_affichage(taille_totale, couleurs, modele_raw, delay):
             modele_raw,
             couleurs,
             delay,
+            niveau2,
         ),
     )
 

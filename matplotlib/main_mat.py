@@ -28,6 +28,21 @@ labels_grille = [
 
 # ON GENERE LE MONDE
 
+print(r"  ____    _    _   _  ____ __   __     ____ ____  _   _ ____  _   _ ")
+print(r" / ___|  / \  | \ | ||  _ \\\\ \ / /    / ___|  _ \| | | / ___|| | |")
+print(r"| |     / _ \ |  \| || | | |\ V /    | |   | |_) | | | \___ \| |_| |")
+print(r"| |___ / ___ \| |\  || |_| | | |     | |___|  _ <| |_| |___) |  _  |")
+print(r" \____/_/   \_\_| \_||____/  |_|      \____|_| \_\\___/|____/|_| |_|")
+print("Bienvenue sur le jeu CandyCrush ! ")
+print("Pour plus d'info, allez voir sur github !")
+print("\n")
+user_difficulty = input("Choisir la difficulté (1/2) : ")
+while user_difficulty != "1" and user_difficulty != "2":
+    user_difficulty = input("Choisir la difficulté (1/2) : ")
+if user_difficulty == "2":
+    niveau2 = True
+else:
+    niveau2 = False
 user_choice = int(input("Voulez vous importer un jeu ou creer un jeu random ? 1/2 : "))
 while user_choice != 1 and user_choice != 2:
     user_choice = int(
@@ -45,8 +60,10 @@ if user_choice == 1:
 
 else:
     modele_raw = creer_monde_random(5, taille_totale)
-    while (test_alignement(modele_raw) != []) or (not prevision(modele_raw)):
+    while (test_alignement(modele_raw, niveau2) != []) or (
+        not prevision(modele_raw, niveau2)
+    ):
         modele_raw = creer_monde_random(5, taille_totale)
 
 
-start_affichage(taille_totale, couleurs, modele_raw, delay)
+start_affichage(taille_totale, couleurs, modele_raw, delay, niveau2)
