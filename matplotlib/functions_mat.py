@@ -123,7 +123,7 @@ def pions_autour(grille: list, res: tuple):
 #     |  |  / __ \\  \___|   Y  \  ___/  /    ^   /
 #     |__| (____  /\___  >___|  /\___  > \____   |
 #               \/     \/     \/     \/       |__|
-def modifier_grille(grille, coordonnees, nbr_pions=5):
+def modifier_grille(grille, coordonnees, score, nbr_pions=5):
     if not coordonnees:
         return
 
@@ -147,6 +147,7 @@ def modifier_grille(grille, coordonnees, nbr_pions=5):
 
         for i in range(hauteur):
             grille[i][j] = nouvelle_colonne[i]
+            score[0] = int(score[0]) + 10
 
 
 #      __                .__              .________
@@ -255,9 +256,12 @@ def coup(grille: list, r1: int, c1: int, r2: int, c2: int, niveau2) -> bool:
 #               \/     \/     \/     \/          \/
 
 
-def rafraichir_interface(modele_raw, image_objet, fig):
+def rafraichir_interface(modele_raw, image_objet, fig, texte_score=None, score=None):
     """Met à jour les couleurs des bonbons sur la grille (swap)"""
     image_objet.set_data(modele_raw)
+    if texte_score is not None and score is not None:
+        texte_score.set_text(f"Score : {str(score[0])}")
+
     fig.canvas.draw_idle()  # Redessine la figure
 
 
@@ -272,6 +276,8 @@ def gerer_clic(
     couleurs,
     delay,
     niveau2,
+    score,
+    texte_score,
 ):
 
     # 1er clic
@@ -311,26 +317,26 @@ def gerer_clic(
         # si elle sont a proximité (dist =1)
         if (lat + lon) == 1 and coup(modele_raw, r1, c1, r2, c2, niveau2):
             print(f"Échange réussi entre [{r1},{c1}] et [{r2},{c2}]")
-            rafraichir_interface(modele_raw, img, fig)
+            rafraichir_interface(modele_raw, img, fig, texte_score, score)
             plt.pause(delay)
             fini = test_alignement(modele_raw, niveau2)
             while len(fini) > 0:
                 for r, c in fini:
                     modele_raw[r][c] = len(couleurs) - 1
-                rafraichir_interface(modele_raw, img, fig)
+                rafraichir_interface(modele_raw, img, fig, texte_score, score)
                 plt.pause(delay)
 
-                modifier_grille(modele_raw, fini)
-                rafraichir_interface(modele_raw, img, fig)
+                modifier_grille(modele_raw, fini, score)
+                rafraichir_interface(modele_raw, img, fig, texte_score, score)
                 plt.pause(delay)
                 fini = test_alignement(modele_raw, niveau2)
         else:
             print("Coup invalide ou trop loin")
 
-        rafraichir_interface(modele_raw, img, fig)
+        rafraichir_interface(modele_raw, img, fig, texte_score, score)
 
 
-def start_affichage(taille_totale, couleurs, modele_raw, delay, niveau2):
+def start_affichage(taille_totale, couleurs, modele_raw, delay, niveau2, score):
     """lance l'affichage de la fenetre matplotlib"""
 
     hauteur = len(modele_raw)
@@ -348,7 +354,7 @@ def start_affichage(taille_totale, couleurs, modele_raw, delay, niveau2):
         extent=[-0.5, largeur - 0.5, hauteur - 0.5, -0.5],
     )
     # ajout des grilles noires pour plus de visibilité
-
+    texte_score = ax.set_title(f"Score : {score[0]}", fontsize=16, fontweight="bold")
     ax.set_xticks([x + 0.5 for x in range(largeur - 1)])
     ax.set_yticks([x + 0.5 for x in range(hauteur - 1)])
     ax.grid(True, color="#000000", linestyle="-", linewidth=1)
@@ -370,6 +376,8 @@ def start_affichage(taille_totale, couleurs, modele_raw, delay, niveau2):
             couleurs,
             delay,
             niveau2,
+            score,
+            texte_score,
         ),
     )
 

@@ -20,11 +20,11 @@ couleurs = [
     "#FFFFFF",
 ]  # ne pas rajouter de couleurs !!! Les premieres
 # sont les couleurs des bonbons, la dernière est la couleur de disparition des bonbons
-delay = 1  # delai en seconde !!
+delay = 0.2  # delai en seconde !!
 labels_grille = [
     [None for _ in range(taille_totale)] for _ in range(taille_totale)
 ]  # Stocke les widgets
-
+score = [0]
 
 # ON GENERE LE MONDE
 
@@ -66,4 +66,4 @@ else:
         modele_raw = creer_monde_random(5, taille_totale)
 
 
-start_affichage(taille_totale, couleurs, modele_raw, delay, niveau2)
+start_affichage(taille_totale, couleurs, modele_raw, delay, niveau2, score)
