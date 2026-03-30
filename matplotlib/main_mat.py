@@ -20,7 +20,7 @@ couleurs = [
     "#FFFFFF",
 ]  # ne pas rajouter de couleurs !!! Les premieres
 # sont les couleurs des bonbons, la dernière est la couleur de disparition des bonbons
-delay = 0.3  # delai en seconde !!
+delay = 1  # delai en seconde !!
 labels_grille = [
     [None for _ in range(taille_totale)] for _ in range(taille_totale)
 ]  # Stocke les widgets
