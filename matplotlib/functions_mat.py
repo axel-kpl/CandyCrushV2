@@ -123,7 +123,7 @@ def pions_autour(grille: list, res: tuple):
 #     |  |  / __ \\  \___|   Y  \  ___/  /    ^   /
 #     |__| (____  /\___  >___|  /\___  > \____   |
 #               \/     \/     \/     \/       |__|
-def modifier_grille(grille, coordonnees, score, nbr_pions=5):
+def modifier_grille(grille, coordonnees, score, nbr_pions):
     if not coordonnees:
         return
 
@@ -326,7 +326,7 @@ def gerer_clic(
                 rafraichir_interface(modele_raw, img, fig, texte_score, score)
                 plt.pause(delay)
 
-                modifier_grille(modele_raw, fini, score)
+                modifier_grille(modele_raw, fini, score, len(couleurs) - 1)
                 rafraichir_interface(modele_raw, img, fig, texte_score, score)
                 plt.pause(delay)
                 fini = test_alignement(modele_raw, niveau2)

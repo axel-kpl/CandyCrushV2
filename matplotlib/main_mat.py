@@ -11,14 +11,8 @@ import os
 #                \/              \/    \/          \/
 
 taille_totale = 7
-couleurs = [
-    "#FF9100",
-    "#FF0000",
-    "#498100",
-    "#1700B0",
-    "#AE00B0",
-    "#FFFFFF",
-]  # ne pas rajouter de couleurs !!! Les premieres
+banque = ["#FF9100", "#FF0000", "#498100", "#1700B0", "#AE00B0", "#A33939", "#000000"]
+couleur_dis = "#FFFFFF"  # ne pas rajouter de couleurs !!! Les premieres
 # sont les couleurs des bonbons, la dernière est la couleur de disparition des bonbons
 delay = 0.2  # delai en seconde !!
 labels_grille = [
@@ -43,6 +37,10 @@ if user_difficulty == "2":
     niveau2 = True
 else:
     niveau2 = False
+user_color = int(input("Choissisez le nombre n de couleurs (entre 3 et 7) : "))
+while user_color < 3 or user_color > 7:
+    user_color = int(input("Choissisez le nombre n de couleurs (entre 3 et 7) : "))
+couleurs = banque[:user_color] + [couleur_dis]
 user_choice = int(input("Voulez vous importer un jeu ou creer un jeu random ? 1/2 : "))
 while user_choice != 1 and user_choice != 2:
     user_choice = int(
@@ -59,7 +57,7 @@ if user_choice == 1:
         taille_totale = len(modele_raw)
 
 else:
-    modele_raw = creer_monde_random(5, taille_totale)
+    modele_raw = creer_monde_random(len(couleurs) - 1, taille_totale)
     while (test_alignement(modele_raw, niveau2) != []) or (
         not prevision(modele_raw, niveau2)
     ):
