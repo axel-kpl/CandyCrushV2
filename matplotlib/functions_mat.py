@@ -408,7 +408,7 @@ def extraire_csv(nom_fichier: str, type_int=True) -> list:
                     else:
                         current.append(element)
             grille.append(current)
-    if not (test_alignement(grille) != []) or (not prevision(grille)):
+    if not (test_alignement(grille) != []) or (not prevision(grille, False)):
         return grille
     raise (
         ValueError(

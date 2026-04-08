@@ -12,7 +12,7 @@ def maj_diff(label):
 
 
 def maj_mode(label):
-    reglages[1] = "1" if label == "Importer (niveau.csv)" else "2"
+    reglages[1] = "1" if label == "Importer (exemple_grille.csv)" else "2"
 
 
 def maj_slider(val):
